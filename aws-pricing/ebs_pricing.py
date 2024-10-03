@@ -9,8 +9,23 @@ This module contains functions for calculating pricing related to Amazon Elastic
 
 def get_ebs_storage_price(region):
     # WIP
-    pricing = boto3.client('pricing', region_name=region)
-    response = pricing.get_price_list_file_url()
+    pricing = boto3.client('pricing', region_name=region,
+                       aws_access_key_id='xxxxxxxxxxxxxxxxxxxxxxxxx',
+aws_secret_access_key='xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+aws_session_token='xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+)
+
+response = pricing.describe_services()
+service_codes = [service['ServiceCode'] for service in response['Services']]
+all_prices = []
+
+for service_code in service_codes:
+    print(f"Fetching prices for service: {service_code}")
+    paginator = pricing.get_paginator('get_products')
+
+    for page in paginator.paginate(ServiceCode=service_code):
+        for price_item in page['PriceList']:
+            all_prices.append(price_item)
 
     print(response)
 
